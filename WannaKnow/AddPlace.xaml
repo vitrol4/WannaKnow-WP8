@@ -28,7 +28,12 @@
 
         <!--ContentPanel - place additional content here-->
         <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-
+            <StackPanel>
+                <Button x:Name="OneShotLocationButton" Click="OneShotLocation_Click" Content="get my location" />
+                <TextBlock x:Name="LatitudeTextBlock" />
+                <TextBlock x:Name="LongitudeTextBlock" />
+                <TextBlock x:Name="StatusTextBlock" />
+            </StackPanel>
         </Grid>
     </Grid>
 
