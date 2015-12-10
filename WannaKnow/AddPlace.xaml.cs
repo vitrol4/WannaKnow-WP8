@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Navigation;
 using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
-using System.Threading.Tasks;
 using Windows.Devices.Geolocation;
 using System.IO.IsolatedStorage;
-using System.IO;
 
 namespace WannaKnow
 {
@@ -35,6 +29,11 @@ namespace WannaKnow
                 return;
             }
 
+            System.Globalization.CultureInfo customCulture = (System.Globalization.CultureInfo)
+                System.Threading.Thread.CurrentThread.CurrentCulture.Clone();
+            customCulture.NumberFormat.NumberDecimalSeparator = ".";
+            System.Threading.Thread.CurrentThread.CurrentCulture = customCulture;
+
             Geolocator geolocator = new Geolocator();
             geolocator.DesiredAccuracyInMeters = 10;
 
@@ -51,9 +50,13 @@ namespace WannaKnow
                     geoposition.Coordinate.Latitude,
                     geoposition.Coordinate.Longitude);
 
-                HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urlFilled);
-                request.Method = "GET";
-                request.BeginGetResponse(GetListPlacesCallback, request);
+                //HttpWebRequest request = (HttpWebRequest)HttpWebRequest.Create(urlFilled);
+                //request.Method = "GET";
+                //request.BeginGetResponse(GetListPlacesCallback, request);
+
+                WebClient webClient = new WebClient();
+                webClient.DownloadStringCompleted += new DownloadStringCompletedEventHandler(GetListPlacesCallback);
+                webClient.DownloadStringAsync(new Uri(urlFilled));
 
                 LatitudeTextBlock.Text = geoposition.Coordinate.Latitude.ToString("0.0000000");
                 LongitudeTextBlock.Text = geoposition.Coordinate.Longitude.ToString("0.0000000");
@@ -72,26 +75,13 @@ namespace WannaKnow
 
         }
 
-        private void GetListPlacesCallback(IAsyncResult result)
+        void GetListPlacesCallback(object sender, DownloadStringCompletedEventArgs e)
         {
-            HttpWebRequest request = result.AsyncState as HttpWebRequest;
-            if (request != null)
+            if (e.Error == null)
             {
-                try
-                {
-                    string responseString = "";
-                    WebResponse response = request.EndGetResponse(result);
-                    Stream streamResponse = response.GetResponseStream();
-                    using (var reader = new StreamReader(streamResponse))
-                    {
-                        responseString = reader.ReadToEnd();
-                    }
-                    
-                }
-                catch (WebException e)
-                {
-                    return;
-                }
+                StatusTextBlock.Text = e.Result;
+
+                
             }
         }
 
